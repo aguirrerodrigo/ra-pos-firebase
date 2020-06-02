@@ -22,7 +22,8 @@ import { SearchResultItem } from './models/search-result-item';
 export class SearchComponent {
 	private _search = '';
 	private buffer = new Set<SearchItem>();
-	_result: SearchResultItem[] = [];
+	private _result: SearchResultItem[] = [];
+	private _items: SearchItem[] = [];
 	selectedIndex = 0;
 
 	get result(): SearchResultItem[] {
@@ -72,7 +73,15 @@ export class SearchComponent {
 	];
 	@Input() placeholder = 'Search';
 	@Input() caseSensitive = false;
-	@Input() items: SearchItem[] = [];
+
+	get items(): SearchItem[] {
+		return this._items;
+	}
+
+	@Input() set items(value: SearchItem[]) {
+		this._items = value;
+		this.search = this.search;
+	}
 
 	@Output() readonly itemSelect = new EventEmitter<SearchResultItem>();
 

@@ -1,16 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { MenuItem } from '@app/models/menu-item';
-import Menu from '@src/assets/json/menu.json';
+import { AngularFireDatabase } from '@angular/fire/database';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class MenuService {
-	private static menu: MenuItem[] = Menu;
+	menu: MenuItem[];
+	menuChange = new EventEmitter();
 
-	constructor() {}
-
-	getMenu(): MenuItem[] {
-		return MenuService.menu;
+	constructor(db: AngularFireDatabase) {
+		db.list<MenuItem>('menu')
+			.valueChanges()
+			.subscribe((menu: MenuItem[]) => {
+				this.menu = menu;
+				this.menuChange.emit();
+			});
 	}
 }
