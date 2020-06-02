@@ -24,7 +24,10 @@ export class OrderComponent {
 		private infoService: InfoService
 	) {
 		this.order = orderService.order;
-		this.orderService.orderChange.subscribe((o: Order) => (this.order = o));
+		this.orderService.orderChange.subscribe((o: Order) => {
+			this.order = o;
+			this.selectedIndex = 0;
+		});
 		this.orderService.itemEdit.subscribe((item: OrderItem) =>
 			this.onItemEdit(item)
 		);
