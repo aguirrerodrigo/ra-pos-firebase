@@ -33,18 +33,18 @@ export class MenuSearchComponent {
 		private orderService: OrderService
 	) {
 		this.orderService.orderChange.subscribe(() => this.search.focus());
-		this.searchItems = this.getSearchItems();
+		this.menuService.menuChange.subscribe(() => this.updateSearchItems());
 	}
 
-	private getSearchItems(): SearchItem[] {
-		const result: SearchItem[] = [];
+	private updateSearchItems(): void {
+		const buffer: SearchItem[] = [];
 
-		const menu = this.menuService.getMenu();
+		const menu = this.menuService.menu;
 		for (const menuItem of menu) {
-			result.push(new SearchItem(menuItem.name, menuItem));
+			buffer.push(new SearchItem(menuItem.name, menuItem));
 		}
 
-		return result;
+		this.searchItems = buffer;
 	}
 
 	onSelect(searchResultItem: SearchResultItem, quantity: number): void {

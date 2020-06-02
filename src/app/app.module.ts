@@ -28,7 +28,12 @@ import { ScrollIntoViewDirective } from './directives/scroll-into-view.directive
 import { SelectOnFocusDirective } from './directives/select-on-focus.directive';
 
 import { PhpCurrencyPipe } from './pipes/php-currency.pipe';
+
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { AngularFireModule } from '@angular/fire';
+import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
+import { AngularFireDatabaseModule } from '@angular/fire/database';
+import { AngularFirestoreModule } from '@angular/fire/firestore';
 
 @NgModule({
 	declarations: [
@@ -56,7 +61,11 @@ import { ServiceWorkerModule } from '@angular/service-worker';
 		FontAwesomeModule,
 		ServiceWorkerModule.register('ngsw-worker.js', {
 			enabled: environment.production
-		})
+		}),
+		AngularFireModule.initializeApp(environment.firebase),
+		AngularFireAnalyticsModule,
+		AngularFireDatabaseModule,
+		AngularFirestoreModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]
