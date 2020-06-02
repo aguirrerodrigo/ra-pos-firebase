@@ -1,0 +1,11 @@
+{
+  "targets": {
+    "ra-pos-ph": {
+      "hosting": {
+        "ra-pos": [
+          "ra-pos-ph"
+        ]
+      }
+    }
+  }
+}
