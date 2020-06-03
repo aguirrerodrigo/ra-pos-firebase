@@ -79,8 +79,12 @@ export class SearchComponent {
 	}
 
 	@Input() set items(value: SearchItem[]) {
+		const doSearch = !this._items;
+
 		this._items = value;
-		this.search = this.search;
+		if (doSearch) {
+			this.search = this.search;
+		}
 	}
 
 	@Output() readonly itemSelect = new EventEmitter<SearchResultItem>();
