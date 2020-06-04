@@ -7,26 +7,20 @@ import { OrderService } from './order.service';
 })
 export class PaymentService {
 	private _payment: Payment;
-	readonly paymentChange = new EventEmitter<Payment>();
-	readonly paymentUpdate = new EventEmitter<Payment>();
+	readonly paymentChange = new EventEmitter();
+	readonly paymentUpdate = new EventEmitter();
 
 	get payment(): Payment {
 		return this._payment;
 	}
 
-	set payment(value: Payment) {
-		this._payment = value;
-		this.paymentChange.emit(this._payment);
-	}
-
 	constructor(private orderService: OrderService) {
-		this.orderService.orderChange.subscribe(
-			() => (this.payment = new Payment(this.orderService.order))
-		);
-		this.orderService.orderUpdate.subscribe(() =>
-			this.paymentUpdate.emit(this._payment)
-		);
-		this.payment = new Payment(orderService.order);
+		this.orderService.orderChange.subscribe(() => {
+			this._payment = new Payment(this.orderService.order);
+			this.paymentChange.emit();
+		});
+		this.orderService.orderUpdate.subscribe(() => this.paymentUpdate.emit());
+		this._payment = new Payment(this.orderService.order);
 	}
 
 	checkout(): void {

@@ -52,11 +52,11 @@ export class PaymentComponent {
 	}
 
 	constructor(private paymentService: PaymentService) {
-		this.paymentService.paymentChange.subscribe((p: Payment) =>
-			this.setPayment(p)
+		this.paymentService.paymentChange.subscribe(() =>
+			this.setPayment(this.paymentService.payment)
 		);
-		this.paymentService.paymentUpdate.subscribe((p: Payment) =>
-			this.setPayment(p)
+		this.paymentService.paymentUpdate.subscribe(() =>
+			this.setPayment(this.paymentService.payment)
 		);
 		this.setPayment(this.paymentService.payment);
 	}
