@@ -1,7 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Payment } from '@app/models/payment';
 import { OrderService } from './order.service';
-import { Order } from '@app/models/order';
 
 @Injectable({
 	providedIn: 'root'
@@ -22,15 +21,15 @@ export class PaymentService {
 
 	constructor(private orderService: OrderService) {
 		this.orderService.orderChange.subscribe(
-			(o: Order) => (this.payment = new Payment(this.orderService.order))
+			() => (this.payment = new Payment(this.orderService.order))
 		);
-		this.orderService.orderUpdate.subscribe((o: Order) =>
+		this.orderService.orderUpdate.subscribe(() =>
 			this.paymentUpdate.emit(this._payment)
 		);
 		this.payment = new Payment(orderService.order);
 	}
 
 	checkout(): void {
-		this.orderService.order = new Order();
+		this.orderService.new();
 	}
 }
