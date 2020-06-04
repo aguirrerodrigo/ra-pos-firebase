@@ -2,6 +2,8 @@ import { OrderItem } from './order-item';
 
 export class Order {
 	items: OrderItem[] = [];
+	startDate = new Date();
+	endDate?: Date;
 
 	get count(): number {
 		let count = 0;

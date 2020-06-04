@@ -1,6 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { Payment } from '@app/models/payment';
 import { OrderService } from './order.service';
+import { OrderRepository } from '../repositories/order-repository';
 
 @Injectable({
 	providedIn: 'root'
@@ -14,7 +15,10 @@ export class PaymentService {
 		return this._payment;
 	}
 
-	constructor(private orderService: OrderService) {
+	constructor(
+		private orderService: OrderService,
+		private repo: OrderRepository
+	) {
 		this.orderService.orderChange.subscribe(() => {
 			this._payment = new Payment(this.orderService.order);
 			this.paymentChange.emit();
@@ -24,6 +28,8 @@ export class PaymentService {
 	}
 
 	checkout(): void {
+		this.orderService.order.endDate = new Date();
+		this.repo.save(this.orderService.order, this.payment);
 		this.orderService.new();
 	}
 }

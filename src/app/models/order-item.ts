@@ -17,7 +17,7 @@ export class OrderItem {
 			this.name = menuItem.name;
 			this.description = menuItem.description;
 			this.price = menuItem.price;
-			this.custom = menuItem.custom;
+			this.custom = menuItem.custom || false;
 		}
 
 		if (quantitiy != null) {

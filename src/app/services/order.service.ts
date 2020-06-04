@@ -18,7 +18,10 @@ export class OrderService {
 	readonly itemEdit = new EventEmitter<OrderItem>();
 
 	constructor(private repo: OrderItemRepository) {
-		repo.listChange.subscribe(() => (this._order.items = this.repo.list));
+		repo.listChange.subscribe(() => {
+			this._order.items = this.repo.list;
+			this.orderUpdate.emit();
+		});
 	}
 
 	new(): void {
@@ -30,6 +33,10 @@ export class OrderService {
 	add(menuItem: MenuItem, quantity: number = 1): void {
 		if (quantity <= 0) {
 			quantity = 1;
+		}
+
+		if (this.order.items.length === 0) {
+			this.order.startDate = new Date();
 		}
 
 		const ref = this.repo.getByNameAndPrice(menuItem.name, menuItem.price);

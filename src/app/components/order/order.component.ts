@@ -92,11 +92,6 @@ export class OrderComponent {
 
 		const item = this.order.items[this.selectedIndex];
 		this.orderService.delete(item);
-
-		const length = this.order.items.length;
-		if (this.selectedIndex > 0 && this.selectedIndex >= length) {
-			this.selectedIndex = length - 1;
-		}
 	}
 
 	editItem(item: OrderItem): void {
@@ -108,6 +103,11 @@ export class OrderComponent {
 	}
 
 	private onOrderUpdate(order: Order): void {
+		const length = this.order.items.length;
+		if (this.selectedIndex > 0 && this.selectedIndex >= length) {
+			this.selectedIndex = length - 1;
+		}
+
 		if (this.order.count === 0) {
 			this.generateRandomInfo();
 		}
