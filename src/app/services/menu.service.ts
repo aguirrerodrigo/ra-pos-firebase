@@ -7,7 +7,7 @@ import { AngularFireDatabase } from '@angular/fire/database';
 })
 export class MenuService {
 	menu: MenuItem[];
-	menuChange = new EventEmitter();
+	readonly menuChange = new EventEmitter();
 
 	constructor(db: AngularFireDatabase) {
 		db.list<MenuItem>('menu')

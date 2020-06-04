@@ -2,60 +2,53 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Order } from '@app/models/order';
 import { MenuItem } from '@app/models/menu-item';
 import { OrderItem } from '@app/models/order-item';
-import { OrderMenuMap } from './order-menu-map';
-import { isNullOrWhiteSpace } from '@app/utils';
+import { OrderItemRepository } from '@app/repositories/order-item-repository';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class OrderService {
-	private map = new OrderMenuMap();
 	private _order = new Order();
-	readonly orderChange = new EventEmitter<Order>();
-	readonly orderUpdate = new EventEmitter<Order>();
-	readonly itemEdit = new EventEmitter<OrderItem>();
 
 	get order(): Order {
 		return this._order;
 	}
+	readonly orderChange = new EventEmitter();
+	readonly orderUpdate = new EventEmitter();
+	readonly itemEdit = new EventEmitter<OrderItem>();
 
-	set order(value: Order) {
-		this.map = new OrderMenuMap();
-		this._order = value;
-		this.orderChange.emit(this._order);
+	constructor(private repo: OrderItemRepository) {
+		repo.listChange.subscribe(() => (this._order.items = this.repo.list));
+	}
+
+	new(): void {
+		this.repo.clear();
+		this._order = new Order();
+		this.orderChange.emit();
 	}
 
 	add(menuItem: MenuItem, quantity: number = 1): void {
-		let orderItem: OrderItem;
+		if (quantity <= 0) {
+			quantity = 1;
+		}
 
-		if (this.map.hasMenuItem(menuItem)) {
-			orderItem = this.map.getOrderItem(menuItem);
-			orderItem.quantity += quantity;
+		const ref = this.repo.getByNameAndPrice(menuItem.name, menuItem.price);
+		if (ref != null) {
+			ref.quantity += quantity;
+			this.repo.save(ref);
 		} else {
-			orderItem = new OrderItem(menuItem);
-			orderItem.quantity = quantity;
-			this.map.set(menuItem, orderItem);
-
-			this.order.add(orderItem);
+			this.repo.save(new OrderItem(menuItem, quantity));
 		}
+		this.orderUpdate.emit();
+	}
 
-		this.orderUpdate.emit(this.order);
-
-		if (
-			orderItem.price === 0 ||
-			isNullOrWhiteSpace(orderItem.name) ||
-			orderItem.name === 'Miscellaneous Item'
-		) {
-			this.itemEdit.emit(orderItem);
-		}
+	save(orderItem: OrderItem): void {
+		this.repo.save(orderItem);
+		this.orderUpdate.emit();
 	}
 
 	delete(orderItem: OrderItem): void {
-		if (this.map.hasOrderItem(orderItem)) {
-			this.map.deleteByOrderItem(orderItem);
-
-			this.order.delete(orderItem);
-			this.orderUpdate.emit(this.order);
-		}
+		this.repo.delete(orderItem);
+		this.orderUpdate.emit();
 	}
 }

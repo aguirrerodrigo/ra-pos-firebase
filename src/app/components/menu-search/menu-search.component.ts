@@ -32,8 +32,8 @@ export class MenuSearchComponent {
 		private menuService: MenuService,
 		private orderService: OrderService
 	) {
-		this.orderService.orderChange.subscribe(() => this.search.focus());
 		this.menuService.menuChange.subscribe(() => this.updateSearchItems());
+		this.orderService.orderChange.subscribe(() => this.search.focus());
 	}
 
 	private updateSearchItems(): void {

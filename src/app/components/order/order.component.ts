@@ -24,15 +24,15 @@ export class OrderComponent {
 		private infoService: InfoService
 	) {
 		this.order = orderService.order;
-		this.orderService.orderChange.subscribe((o: Order) => {
-			this.order = o;
+		this.orderService.orderChange.subscribe(() => {
+			this.order = this.orderService.order;
 			this.selectedIndex = 0;
 		});
 		this.orderService.itemEdit.subscribe((item: OrderItem) =>
 			this.onItemEdit(item)
 		);
-		this.orderService.orderUpdate.subscribe((o: Order) =>
-			this.onOrderUpdate(o)
+		this.orderService.orderUpdate.subscribe(() =>
+			this.onOrderUpdate(this.order)
 		);
 		this.generateRandomInfo();
 	}
@@ -70,7 +70,7 @@ export class OrderComponent {
 		if (item.quantity > 1) {
 			item.quantity--;
 
-			this.orderService.orderUpdate.emit(this.order);
+			this.orderService.save(item);
 		}
 	}
 
@@ -83,7 +83,7 @@ export class OrderComponent {
 		if (item.quantity < 9999) {
 			item.quantity++;
 
-			this.orderService.orderUpdate.emit(this.order);
+			this.orderService.save(item);
 		}
 	}
 

@@ -1,15 +1,11 @@
 import { OrderItem } from './order-item';
 
 export class Order {
-	private set = new Set<OrderItem>();
-
-	get items(): OrderItem[] {
-		return [...this.set];
-	}
+	items: OrderItem[] = [];
 
 	get count(): number {
 		let count = 0;
-		for (const item of this.set) {
+		for (const item of this.items) {
 			count += item.quantity;
 		}
 
@@ -18,22 +14,10 @@ export class Order {
 
 	get total(): number {
 		let total = 0;
-		for (const item of this.set) {
+		for (const item of this.items) {
 			total += item.total;
 		}
 
 		return total;
-	}
-
-	add(item: OrderItem): void {
-		if (!this.set.has(item)) {
-			this.set.add(item);
-		}
-	}
-
-	delete(item: OrderItem): void {
-		if (this.set.has(item)) {
-			this.set.delete(item);
-		}
 	}
 }

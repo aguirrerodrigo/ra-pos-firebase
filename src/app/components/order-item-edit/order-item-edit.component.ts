@@ -60,7 +60,7 @@ export class OrderItemEditComponent {
 		this.item.quantity = this.quantity;
 		this.modal.close();
 
-		this.orderService.orderUpdate.emit();
+		this.orderService.save(this.item);
 	}
 
 	show(item: OrderItem): void {
