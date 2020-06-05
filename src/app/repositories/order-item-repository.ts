@@ -1,13 +1,6 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { OrderItem } from '@app/models/order-item';
-import {
-	key,
-	isNullOrWhiteSpace,
-	merge,
-	keep,
-	isKeep,
-	clearKeep
-} from '@app/utils';
+import { key, isNullOrWhiteSpace, keep, isKeep, clearKeep } from '@app/utils';
 import { AngularFireDatabase } from '@angular/fire/database';
 
 @Injectable({
@@ -45,14 +38,14 @@ export class OrderItemRepository {
 			if (ref != null) {
 				const name = ref.name;
 				const price = ref.price;
-				if (merge(ref, item)) {
+				if (Object.assign(ref, item)) {
 					this.nameAndPriceMap.delete(key(name, price));
 					this.nameAndPriceMap.set(key(ref.name, ref.price), ref);
 					dirty = true;
 				}
 			} else {
 				ref = new OrderItem();
-				merge(ref, item);
+				Object.assign(ref, item);
 				this.idMap.set(ref.id, ref);
 				this.nameAndPriceMap.set(key(ref.name, ref.price), ref);
 				this.set.add(ref);
@@ -103,7 +96,7 @@ export class OrderItemRepository {
 			if (ref == null) {
 				this.add(orderItem);
 			} else {
-				merge(ref, orderItem);
+				Object.assign(ref, orderItem);
 
 				this.db.object('order/items/' + orderItem.id).update(orderItem);
 			}

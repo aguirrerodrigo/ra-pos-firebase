@@ -23,15 +23,3 @@ export function clearKeep(obj: any): void {
 export function key(...args: any[]): string {
 	return args.join('::').toLowerCase();
 }
-
-export function merge(ref: any, data: any): boolean {
-	let dirty = false;
-	for (const k of Object.keys(data)) {
-		if (ref[k] !== data[k]) {
-			ref[k] = data[k];
-			dirty = true;
-		}
-	}
-
-	return dirty;
-}
