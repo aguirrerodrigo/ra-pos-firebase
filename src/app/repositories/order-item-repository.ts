@@ -1,7 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
 import { OrderItem } from '@app/models/order-item';
-import { key, isNullOrWhiteSpace, keep, isKeep, clearKeep } from '@app/utils';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { Data, Str } from '@app/utils';
 
 @Injectable({
 	providedIn: 'root'
@@ -39,30 +39,30 @@ export class OrderItemRepository {
 				const name = ref.name;
 				const price = ref.price;
 				if (Object.assign(ref, item)) {
-					this.nameAndPriceMap.delete(key(name, price));
-					this.nameAndPriceMap.set(key(ref.name, ref.price), ref);
+					this.nameAndPriceMap.delete(Data.key(name, price));
+					this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
 					dirty = true;
 				}
 			} else {
 				ref = new OrderItem();
 				Object.assign(ref, item);
 				this.idMap.set(ref.id, ref);
-				this.nameAndPriceMap.set(key(ref.name, ref.price), ref);
+				this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
 				this.set.add(ref);
 				dirty = true;
 			}
 
-			keep(ref);
+			Data.keep(ref);
 		}
 
 		for (const ref of this.set) {
-			if (isKeep(ref) !== true) {
+			if (Data.isKeep(ref) !== true) {
 				this.idMap.delete(ref.id);
-				this.nameAndPriceMap.delete(key(ref.name, ref.price));
+				this.nameAndPriceMap.delete(Data.key(ref.name, ref.price));
 				this.set.delete(ref);
 				dirty = true;
 			} else {
-				clearKeep(ref);
+				Data.clearKeep(ref);
 			}
 		}
 
@@ -85,7 +85,7 @@ export class OrderItemRepository {
 	}
 
 	getByNameAndPrice(name: string, price: number): OrderItem {
-		return this.nameAndPriceMap.get(key(name, price));
+		return this.nameAndPriceMap.get(Data.key(name, price));
 	}
 
 	save(orderItem: OrderItem): void {
@@ -104,11 +104,14 @@ export class OrderItemRepository {
 	}
 
 	private add(orderItem: OrderItem): void {
-		if (isNullOrWhiteSpace(orderItem.id)) {
+		if (Str.isNullOrWhiteSpace(orderItem.id)) {
 			orderItem.id = this.db.createPushId();
 		}
 		this.idMap.set(orderItem.id, orderItem);
-		this.nameAndPriceMap.set(key(orderItem.name, orderItem.price), orderItem);
+		this.nameAndPriceMap.set(
+			Data.key(orderItem.name, orderItem.price),
+			orderItem
+		);
 		this.set.add(orderItem);
 		this.listChange.emit();
 
@@ -119,7 +122,7 @@ export class OrderItemRepository {
 		const ref = this.idMap.get(orderItem.id);
 		if (ref != null) {
 			this.idMap.delete(ref.id);
-			this.nameAndPriceMap.delete(key(ref.name, ref.price));
+			this.nameAndPriceMap.delete(Data.key(ref.name, ref.price));
 			this.set.delete(ref);
 			this.listChange.emit();
 

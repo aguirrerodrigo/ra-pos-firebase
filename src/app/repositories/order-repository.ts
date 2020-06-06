@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
 import { Order } from '@app/models/order';
 import { Payment } from '@app/models/payment';
-import { formatDate } from '@angular/common';
 import { OrderItem } from '@app/models/order-item';
+import { Format } from '@app/utils';
 
 @Injectable({
 	providedIn: 'root'
@@ -15,10 +15,10 @@ export class OrderRepository {
 		if (order == null || payment == null) return;
 
 		this.store.collection('order').add({
-			date: formatDate(new Date(), 'yyyy-MM-dd', 'en-PH'),
+			date: Format.date(new Date()),
 
-			startDate: order.startDate,
-			endDate: order.endDate,
+			createDate: Format.dateTime(order.startDate),
+			endDate: Format.dateTime(order.endDate),
 			items: this.formatItems(order.items),
 			count: order.count,
 			total: order.total,

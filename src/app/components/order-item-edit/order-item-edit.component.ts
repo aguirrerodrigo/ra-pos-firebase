@@ -3,7 +3,7 @@ import { OrderItem } from '@app/models/order-item';
 import { ModalService } from '@app/services/modal.service';
 import { OrderService } from '@app/services/order.service';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { formatPhpCurrency } from '@app/utils';
+import { Format } from '@app/utils';
 
 @Component({
 	selector: 'app-order-item-edit',
@@ -78,7 +78,7 @@ export class OrderItemEditComponent {
 	}
 
 	formatPrice(): void {
-		this._price = formatPhpCurrency(this.priceValue);
+		this._price = Format.phpCurrency(this.priceValue);
 	}
 
 	formatPriceFromValue(): void {
