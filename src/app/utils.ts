@@ -19,6 +19,14 @@ export class Format {
 	static dateTime(date: Date): string {
 		return formatDate(date, Constants.dateTimeFormat, Constants.locale);
 	}
+
+	static time(date: Date): string {
+		return formatDate(date, Constants.timeFormat, Constants.locale);
+	}
+
+	static duration(date: Date): string {
+		return formatDate(date, Constants.timeFormat, Constants.locale, 'UTC');
+	}
 }
 
 export class Str {

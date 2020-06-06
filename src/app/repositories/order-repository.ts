@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, EventEmitter } from '@angular/core';
 import { AngularFirestore } from '@angular/fire/firestore';
+import { AngularFireDatabase } from '@angular/fire/database';
 import { Order } from '@app/models/order';
 import { Payment } from '@app/models/payment';
 import { OrderItem } from '@app/models/order-item';
@@ -9,7 +10,36 @@ import { Format } from '@app/utils';
 	providedIn: 'root'
 })
 export class OrderRepository {
-	constructor(private store: AngularFirestore) {}
+	private _order: Order = new Order();
+
+	get order(): Order {
+		return this._order;
+	}
+
+	readonly orderChange = new EventEmitter();
+
+	constructor(
+		private store: AngularFirestore,
+		private db: AngularFireDatabase
+	) {
+		db.object('order/createDate')
+			.valueChanges()
+			.subscribe((createDate: Date) => {
+				this.order.createDate = new Date(createDate);
+				this.orderChange.emit();
+			});
+	}
+
+	new(): void {
+		this._order = new Order();
+		this.orderChange.emit();
+
+		this.db.object('order').remove();
+	}
+
+	update(data: any): void {
+		this.db.object('order').update(data);
+	}
 
 	save(order: Order, payment: Payment): void {
 		if (order == null || payment == null) return;
@@ -17,8 +47,11 @@ export class OrderRepository {
 		this.store.collection('order').add({
 			date: Format.date(new Date()),
 
-			createDate: Format.dateTime(order.startDate),
-			endDate: Format.dateTime(order.endDate),
+			createDate: Format.dateTime(order.createDate),
+			checkoutDate: Format.dateTime(order.checkoutDate),
+			checkoutDuration: Format.duration(
+				new Date(order.checkoutDate.getTime() - order.createDate.getTime())
+			),
 			items: this.formatItems(order.items),
 			count: order.count,
 			total: order.total,
