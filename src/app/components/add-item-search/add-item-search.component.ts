@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 import { SearchComponent } from '@app/components/search/search.component';
 import { SearchResultItem } from '@app/components/search/models/search-result-item';
-import { isNullOrWhiteSpace } from '@app/utils';
 import { MenuItem } from '@app/models/menu-item';
+import { Str } from '@app/utils';
 
 @Component({
 	selector: 'app-add-item-search',
@@ -19,7 +19,7 @@ export class AddItemSearchComponent extends SearchComponent {
 	}
 
 	set result(value: SearchResultItem[]) {
-		if (!isNullOrWhiteSpace(this.formattedSearch)) {
+		if (!Str.isNullOrWhiteSpace(this.formattedSearch)) {
 			super.result = [...value, this.miscItem(this.formattedSearch)];
 		} else {
 			super.result = value;
@@ -73,7 +73,7 @@ export class AddItemSearchComponent extends SearchComponent {
 			}
 		}
 
-		if (isNullOrWhiteSpace(name)) {
+		if (Str.isNullOrWhiteSpace(name)) {
 			name = 'Miscellaneous Item';
 		} else {
 			name = name.trim();

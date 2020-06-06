@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Payment } from '@app/models/payment';
 import { PaymentService } from '@app/services/payment.service';
-import { formatPhpCurrency } from '@app/utils';
+import { Format } from '@app/utils';
 
 @Component({
 	selector: 'app-payment',
@@ -71,9 +71,9 @@ export class PaymentComponent {
 		if (this.payment.discount.isPercentage) {
 			this._discount = `(-${
 				this.payment.discount.value
-			}%)  ${formatPhpCurrency(-this.payment.totalDiscount)}`;
+			}%)  ${Format.phpCurrency(-this.payment.totalDiscount)}`;
 		} else {
-			this._discount = formatPhpCurrency(-this.payment.totalDiscount);
+			this._discount = Format.phpCurrency(-this.payment.totalDiscount);
 		}
 	}
 
@@ -82,7 +82,7 @@ export class PaymentComponent {
 	}
 
 	formatCash(): void {
-		this._cash = formatPhpCurrency(this.payment.cash);
+		this._cash = Format.phpCurrency(this.payment.cash);
 	}
 
 	checkout(): void {
