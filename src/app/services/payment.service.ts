@@ -28,7 +28,7 @@ export class PaymentService {
 	}
 
 	checkout(): void {
-		this.orderService.order.endDate = new Date();
+		this.orderService.order.checkoutDate = new Date();
 		this.repo.save(this.orderService.order, this.payment);
 		this.orderService.new();
 	}

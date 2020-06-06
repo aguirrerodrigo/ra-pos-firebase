@@ -67,11 +67,7 @@ export class OrderComponent {
 		if (this.order.items.length === 0) return;
 
 		const item = this.order.items[this.selectedIndex];
-		if (item.quantity > 1) {
-			item.quantity--;
-
-			this.orderService.save(item);
-		}
+		this.orderService.decreaseQuantity(item);
 	}
 
 	onArrowRightKey(e: Event): void {
@@ -80,11 +76,7 @@ export class OrderComponent {
 		if (this.order.items.length === 0) return;
 
 		const item = this.order.items[this.selectedIndex];
-		if (item.quantity < 9999) {
-			item.quantity++;
-
-			this.orderService.save(item);
-		}
+		this.orderService.increaseQuantity(item);
 	}
 
 	onDeleteKey(e: Event): void {

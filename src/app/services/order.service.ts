@@ -2,6 +2,7 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Order } from '@app/models/order';
 import { MenuItem } from '@app/models/menu-item';
 import { OrderItem } from '@app/models/order-item';
+import { OrderRepository } from '@app/repositories/order-repository';
 import { OrderItemRepository } from '@app/repositories/order-item-repository';
 
 @Injectable({
@@ -17,16 +18,23 @@ export class OrderService {
 	readonly orderUpdate = new EventEmitter();
 	readonly itemEdit = new EventEmitter<OrderItem>();
 
-	constructor(private repo: OrderItemRepository) {
-		repo.listChange.subscribe(() => {
-			this._order.items = this.repo.list;
+	constructor(
+		private orderRepo: OrderRepository,
+		private orderItemRepo: OrderItemRepository
+	) {
+		orderRepo.orderChange.subscribe(() => {
+			this._order = this.orderRepo.order;
+			this.orderChange.emit();
+		});
+		orderItemRepo.listChange.subscribe(() => {
+			this._order.items = this.orderItemRepo.list;
 			this.orderUpdate.emit();
 		});
 	}
 
 	new(): void {
-		this.repo.clear();
-		this._order = new Order();
+		this.orderRepo.new();
+		this.orderItemRepo.clear();
 		this.orderChange.emit();
 	}
 
@@ -36,26 +44,50 @@ export class OrderService {
 		}
 
 		if (this.order.items.length === 0) {
-			this.order.startDate = new Date();
+			this.order.createDate = new Date();
+			this.orderRepo.update({ createDate: this.order.createDate });
 		}
 
-		const ref = this.repo.getByNameAndPrice(menuItem.name, menuItem.price);
+		const ref = this.orderItemRepo.getByNameAndPrice(
+			menuItem.name,
+			menuItem.price
+		);
 		if (ref != null) {
 			ref.quantity += quantity;
-			this.repo.save(ref);
+			this.orderItemRepo.save(ref);
 		} else {
-			this.repo.save(new OrderItem(menuItem, quantity));
+			this.orderItemRepo.save(new OrderItem(menuItem, quantity));
 		}
 		this.orderUpdate.emit();
 	}
 
+	increaseQuantity(orderItem: OrderItem): void {
+		if (orderItem.quantity < 9999) {
+			orderItem.quantity++;
+
+			this.orderItemRepo.update(orderItem.id, {
+				quantity: orderItem.quantity
+			});
+		}
+	}
+
+	decreaseQuantity(orderItem: OrderItem): void {
+		if (orderItem.quantity > 1) {
+			orderItem.quantity--;
+
+			this.orderItemRepo.update(orderItem.id, {
+				quantity: orderItem.quantity
+			});
+		}
+	}
+
 	save(orderItem: OrderItem): void {
-		this.repo.save(orderItem);
+		this.orderItemRepo.save(orderItem);
 		this.orderUpdate.emit();
 	}
 
 	delete(orderItem: OrderItem): void {
-		this.repo.delete(orderItem);
+		this.orderItemRepo.delete(orderItem);
 		this.orderUpdate.emit();
 	}
 }

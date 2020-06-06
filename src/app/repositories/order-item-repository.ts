@@ -88,6 +88,10 @@ export class OrderItemRepository {
 		return this.nameAndPriceMap.get(Data.key(name, price));
 	}
 
+	update(id: any, data: any): void {
+		this.db.object('order/items/' + id).update(data);
+	}
+
 	save(orderItem: OrderItem): void {
 		if (orderItem.id == null) {
 			this.add(orderItem);
