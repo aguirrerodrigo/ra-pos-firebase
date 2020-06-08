@@ -47,8 +47,8 @@ export class OrderRepository {
 		this.store.collection('order').add({
 			date: Format.date(new Date()),
 
-			createDate: Format.dateTime(order.createDate),
-			checkoutDate: Format.dateTime(order.checkoutDate),
+			createDate: order.createDate,
+			checkoutDate: order.checkoutDate,
 			checkoutDuration: Format.duration(
 				new Date(order.checkoutDate.getTime() - order.createDate.getTime())
 			),
