@@ -1,14 +1,12 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { OrderItem } from '@app/models/order-item';
+import { OrderItem } from '@app/models/pos/order-item';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Data, Str } from '@app/utils';
 
 @Injectable({
 	providedIn: 'root'
 })
-export class OrderItemRepository {
-	private static id = 0;
-
+export class PosItemRepository {
 	private nameAndPriceMap = new Map<any, OrderItem>();
 	private idMap = new Map<any, OrderItem>();
 	private set = new Set<OrderItem>();
@@ -18,19 +16,15 @@ export class OrderItemRepository {
 	}
 	listChange = new EventEmitter();
 
-	private static seed(): number {
-		return ++OrderItemRepository.id;
-	}
-
 	constructor(private db: AngularFireDatabase) {
-		db.list('order/items')
+		db.list('pos/items')
 			.valueChanges()
-			.subscribe((items: OrderItem[]) => {
+			.subscribe((items: any[]) => {
 				this.merge(items);
 			});
 	}
 
-	private merge(items: OrderItem[]): void {
+	private merge(items: any[]): void {
 		let dirty = false;
 
 		for (const item of items) {
@@ -38,14 +32,14 @@ export class OrderItemRepository {
 			if (ref != null) {
 				const name = ref.name;
 				const price = ref.price;
-				if (Object.assign(ref, item)) {
+				if (Data.merge(ref, item)) {
 					this.nameAndPriceMap.delete(Data.key(name, price));
 					this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
 					dirty = true;
 				}
 			} else {
 				ref = new OrderItem();
-				Object.assign(ref, item);
+				Data.merge(ref, item);
 				this.idMap.set(ref.id, ref);
 				this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
 				this.set.add(ref);
@@ -77,7 +71,7 @@ export class OrderItemRepository {
 		this.set.clear();
 		this.listChange.emit();
 
-		this.db.object('order/items').remove();
+		this.db.object('pos/items').remove();
 	}
 
 	getById(id: string): OrderItem {
@@ -89,7 +83,7 @@ export class OrderItemRepository {
 	}
 
 	update(id: any, data: any): void {
-		this.db.object('order/items/' + id).update(data);
+		this.db.object('pos/items/' + id).update(data);
 	}
 
 	save(orderItem: OrderItem): void {
@@ -100,9 +94,9 @@ export class OrderItemRepository {
 			if (ref == null) {
 				this.add(orderItem);
 			} else {
-				Object.assign(ref, orderItem);
+				Data.merge(ref, orderItem);
 
-				this.db.object('order/items/' + orderItem.id).update(orderItem);
+				this.db.object('pos/items/' + orderItem.id).update(orderItem);
 			}
 		}
 	}
@@ -119,7 +113,7 @@ export class OrderItemRepository {
 		this.set.add(orderItem);
 		this.listChange.emit();
 
-		this.db.object('order/items/' + orderItem.id).set(orderItem);
+		this.db.object('pos/items/' + orderItem.id).set(orderItem);
 	}
 
 	delete(orderItem: OrderItem): void {
@@ -130,7 +124,7 @@ export class OrderItemRepository {
 			this.set.delete(ref);
 			this.listChange.emit();
 
-			this.db.object('order/items/' + ref.id).remove();
+			this.db.object('pos/items/' + ref.id).remove();
 		}
 	}
 }

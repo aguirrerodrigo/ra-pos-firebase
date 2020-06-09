@@ -1,7 +1,7 @@
 import { Component, ViewChild, TemplateRef, ElementRef } from '@angular/core';
-import { OrderItem } from '@app/models/order-item';
+import { OrderItem } from '@app/models/pos/order-item';
 import { ModalService } from '@app/services/modal.service';
-import { OrderService } from '@app/services/order.service';
+import { PosService } from '@app/services/pos.service';
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Format } from '@app/utils';
 
@@ -38,10 +38,10 @@ export class OrderItemEditComponent {
 	@ViewChild('customContent') customContent: TemplateRef<any>;
 
 	constructor(
-		private orderService: OrderService,
+		private posService: PosService,
 		private modalService: ModalService
 	) {
-		this.orderService.itemEdit.subscribe((i: OrderItem) => this.show(i));
+		this.posService.itemEdit.subscribe((i: OrderItem) => this.show(i));
 		this.formatPrice();
 	}
 
@@ -50,7 +50,7 @@ export class OrderItemEditComponent {
 	}
 
 	delete(): void {
-		this.orderService.delete(this.item);
+		this.posService.deleteItem(this.item);
 		this.modal.close();
 	}
 
@@ -60,7 +60,7 @@ export class OrderItemEditComponent {
 		this.item.quantity = this.quantity;
 		this.modal.close();
 
-		this.orderService.save(this.item);
+		this.posService.saveItem(this.item);
 	}
 
 	show(item: OrderItem): void {

@@ -1,7 +1,7 @@
 import { Component, ViewChild } from '@angular/core';
 import { SearchItem } from '@app/components/search/models/search-item';
 import { MenuService } from '@app/services/menu.service';
-import { OrderService } from '@app/services/order.service';
+import { PosService } from '@app/services/pos.service';
 import { SearchStrategy } from '@app/components/search/models/search-strategy';
 import { TextStartsStrategy } from '@app/components/search/models/text-starts-strategy';
 import { WordStartsStrategy } from '@app/components/search/models/word-starts-strategy';
@@ -30,10 +30,10 @@ export class MenuSearchComponent {
 
 	constructor(
 		private menuService: MenuService,
-		private orderService: OrderService
+		private posService: PosService
 	) {
 		this.menuService.menuChange.subscribe(() => this.updateSearchItems());
-		this.orderService.orderChange.subscribe(() => this.search.focus());
+		this.posService.orderChange.subscribe(() => this.search.focus());
 	}
 
 	private updateSearchItems(): void {
@@ -48,6 +48,8 @@ export class MenuSearchComponent {
 	}
 
 	onSelect(searchResultItem: SearchResultItem, quantity: number): void {
-		setTimeout(() => this.orderService.add(searchResultItem.model, quantity));
+		setTimeout(() =>
+			this.posService.addItem(searchResultItem.model, quantity)
+		);
 	}
 }

@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { Payment } from '@app/models/payment';
-import { PaymentService } from '@app/services/payment.service';
+import { Order } from '@app/models/pos/order';
+import { PosService } from '@app/services/pos.service';
 import { Format } from '@app/utils';
 
 @Component({
@@ -11,11 +11,11 @@ import { Format } from '@app/utils';
 export class PaymentComponent {
 	private _discount: string;
 	private _cash: string;
-	payment: Payment;
+	order: Order;
 	confirm = false;
 
 	get canPay(): boolean {
-		return this.payment.afterDiscount <= this.payment.cash;
+		return this.order.afterDiscount <= this.order.cash;
 	}
 
 	get discount(): string {
@@ -24,14 +24,14 @@ export class PaymentComponent {
 
 	set discount(value: string) {
 		this._discount = value;
-		this.payment.discount.isPercentage = value.endsWith('%');
-		if (this.payment.discount.isPercentage) {
+		this.order.discount.isPercentage = value.endsWith('%');
+		if (this.order.discount.isPercentage) {
 			value = value.substr(value.length - 1);
 		}
 
 		const n = Number(value);
 		if (!isNaN(n)) {
-			this.payment.discount.value = Math.abs(n);
+			this.order.discount.value = Math.abs(n);
 		}
 
 		this.confirm = false;
@@ -45,57 +45,57 @@ export class PaymentComponent {
 		this._cash = value;
 		const n = Number(value);
 		if (!isNaN(n)) {
-			this.payment.cash = n;
+			this.order.cash = n;
 		}
 
 		this.confirm = false;
 	}
 
-	constructor(private paymentService: PaymentService) {
-		this.paymentService.paymentChange.subscribe(() =>
-			this.setPayment(this.paymentService.payment)
+	constructor(private posService: PosService) {
+		this.posService.orderChange.subscribe(() =>
+			this.setOrder(this.posService.order)
 		);
-		this.paymentService.paymentUpdate.subscribe(() =>
-			this.setPayment(this.paymentService.payment)
+		this.posService.orderUpdate.subscribe(() =>
+			this.setOrder(this.posService.order)
 		);
-		this.setPayment(this.paymentService.payment);
+		this.setOrder(this.posService.order);
 	}
 
 	formatDiscountFromValue(): void {
 		this._discount =
-			this.payment.discount.value.toString() +
-			(this.payment.discount.isPercentage ? '%' : '');
+			this.order.discount.value.toString() +
+			(this.order.discount.isPercentage ? '%' : '');
 	}
 
 	formatDiscount(): void {
-		if (this.payment.discount.isPercentage) {
+		if (this.order.discount.isPercentage) {
 			this._discount = `(-${
-				this.payment.discount.value
-			}%)  ${Format.phpCurrency(-this.payment.totalDiscount)}`;
+				this.order.discount.value
+			}%)  ${Format.phpCurrency(-this.order.totalDiscount)}`;
 		} else {
-			this._discount = Format.phpCurrency(-this.payment.totalDiscount);
+			this._discount = Format.phpCurrency(-this.order.totalDiscount);
 		}
 	}
 
 	formatCashFromValue(): void {
-		this._cash = this.payment.cash.toString();
+		this._cash = this.order.cash.toString();
 	}
 
 	formatCash(): void {
-		this._cash = Format.phpCurrency(this.payment.cash);
+		this._cash = Format.phpCurrency(this.order.cash);
 	}
 
 	checkout(): void {
 		if (!this.confirm) {
 			this.confirm = true;
 		} else {
-			this.paymentService.checkout();
+			this.posService.checkout();
 			this.confirm = false;
 		}
 	}
 
-	private setPayment(payment: Payment): void {
-		this.payment = payment;
+	private setOrder(order: Order): void {
+		this.order = order;
 
 		this.formatDiscount();
 		this.formatCash();
