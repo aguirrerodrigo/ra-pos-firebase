@@ -1,9 +1,7 @@
 import { Injectable, EventEmitter } from '@angular/core';
-import { AngularFirestore } from '@angular/fire/firestore';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Order } from '@app/models/pos/order';
-import { OrderItem } from '@app/models/pos/order-item';
-import { Format, Data } from '@app/utils';
+import { Data } from '@app/utils';
 import * as moment from 'moment';
 
 @Injectable({
@@ -18,10 +16,7 @@ export class PosOrderRepository {
 
 	readonly orderChange = new EventEmitter();
 
-	constructor(
-		private store: AngularFirestore,
-		private db: AngularFireDatabase
-	) {
+	constructor(private db: AngularFireDatabase) {
 		db.object('pos/order')
 			.valueChanges()
 			.subscribe((data: any) => {
@@ -70,45 +65,5 @@ export class PosOrderRepository {
 
 	update(data: any): void {
 		this.db.object('pos/order').update(data);
-	}
-
-	save(order: Order): void {
-		if (order == null) return;
-
-		this.store.collection('order').add({
-			date: Format.date(new Date()),
-
-			createDate: order.createDate,
-			checkoutDate: order.checkoutDate,
-			checkoutDuration: Format.duration(
-				new Date(order.checkoutDate.getTime() - order.createDate.getTime())
-			),
-			items: this.formatItems(order.items),
-			count: order.count,
-			total: order.total,
-
-			discount: order.totalDiscount,
-			discountPercentage: order.discount.isPercentage
-				? order.discount.value
-				: null,
-			discountedTotal: order.afterDiscount,
-			cash: order.cash,
-			change: order.change
-		});
-	}
-
-	private formatItems(items: OrderItem[]): any[] {
-		const result = [];
-		for (const item of items) {
-			result.push({
-				name: item.name,
-				description: item.description,
-				price: item.price,
-				quantity: item.quantity,
-				total: item.total
-			});
-		}
-
-		return result;
 	}
 }

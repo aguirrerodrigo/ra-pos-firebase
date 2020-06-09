@@ -4,6 +4,7 @@ import { MenuItem } from '@app/models/menu-item';
 import { OrderItem } from '@app/models/pos/order-item';
 import { PosOrderRepository } from '@app/repositories/pos-order-repository';
 import { PosItemRepository } from '@app/repositories/pos-item-repository';
+import { OrderRepository } from '../repositories/order-repository';
 
 @Injectable({
 	providedIn: 'root'
@@ -22,7 +23,8 @@ export class PosService {
 
 	constructor(
 		private posOrderRepo: PosOrderRepository,
-		private posItemRepo: PosItemRepository
+		private posItemRepo: PosItemRepository,
+		private orderRepo: OrderRepository
 	) {
 		this._order = this.posOrderRepo.order;
 
@@ -93,7 +95,7 @@ export class PosService {
 
 	checkout(): void {
 		this.order.checkoutDate = new Date();
-		this.posOrderRepo.save(this.order);
+		this.orderRepo.add(this.order);
 		this.posOrderRepo.new();
 		this.posItemRepo.clear();
 		this.orderChange.emit();
