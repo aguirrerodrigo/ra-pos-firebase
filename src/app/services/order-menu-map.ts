@@ -1,5 +1,5 @@
 import { MenuItem } from '@app/models/menu-item';
-import { OrderItem } from '@app/models/order-item';
+import { OrderItem } from '@app/models/pos/order-item';
 
 export class OrderMenuMap {
 	menuMap = new Map<OrderItem, MenuItem>();

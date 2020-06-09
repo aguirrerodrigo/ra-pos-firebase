@@ -51,4 +51,19 @@ export class Data {
 	static key(...args: any[]): string {
 		return args.join('::').toLowerCase();
 	}
+
+	static merge(ref: any, data: any, converter: any = {}): boolean {
+		if (data == null) return false;
+
+		let dirty = false;
+		for (const k of Object.keys(data)) {
+			const value = converter[k] ? converter[k](data[k]) : data[k];
+			if (ref[k] !== value) {
+				ref[k] = value;
+				dirty = true;
+			}
+		}
+
+		return dirty;
+	}
 }

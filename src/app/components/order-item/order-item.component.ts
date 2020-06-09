@@ -1,6 +1,6 @@
 import { Component, Input, ViewChild } from '@angular/core';
-import { OrderItem } from '@app/models/order-item';
-import { OrderService } from '@app/services/order.service';
+import { OrderItem } from '@app/models/pos/order-item';
+import { PosService } from '@app/services/pos.service';
 
 @Component({
 	selector: 'app-order-item',
@@ -10,5 +10,5 @@ import { OrderService } from '@app/services/order.service';
 export class OrderItemComponent {
 	@Input() item: OrderItem;
 
-	constructor(private orderService: OrderService) {}
+	constructor(private orderService: PosService) {}
 }

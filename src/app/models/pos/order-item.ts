@@ -1,4 +1,4 @@
-import { MenuItem } from './menu-item';
+import { MenuItem } from '@app/models/menu-item';
 
 export class OrderItem {
 	id: any;

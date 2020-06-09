@@ -1,8 +1,8 @@
 import { Component, ViewChildren, QueryList, ElementRef } from '@angular/core';
-import { OrderService } from '@app/services/order.service';
+import { PosService } from '@app/services/pos.service';
 import { InfoService } from '@app/services/info.service';
-import { Order } from '@app/models/order';
-import { OrderItem } from '@app/models/order-item';
+import { Order } from '@app/models/pos/order';
+import { OrderItem } from '@app/models/pos/order-item';
 import { OrderItemComponent } from '@app/components/order-item/order-item.component';
 
 @Component({
@@ -20,18 +20,18 @@ export class OrderComponent {
 	orderItems: QueryList<ElementRef>;
 
 	constructor(
-		private orderService: OrderService,
+		private posService: PosService,
 		private infoService: InfoService
 	) {
-		this.order = orderService.order;
-		this.orderService.orderChange.subscribe(() => {
-			this.order = this.orderService.order;
+		this.order = posService.order;
+		this.posService.orderChange.subscribe(() => {
+			this.order = this.posService.order;
 			this.selectedIndex = 0;
 		});
-		this.orderService.itemEdit.subscribe((item: OrderItem) =>
+		this.posService.itemEdit.subscribe((item: OrderItem) =>
 			this.onItemEdit(item)
 		);
-		this.orderService.orderUpdate.subscribe(() =>
+		this.posService.orderUpdate.subscribe(() =>
 			this.onOrderUpdate(this.order)
 		);
 		this.generateRandomInfo();
@@ -58,7 +58,7 @@ export class OrderComponent {
 	onEnterKey(e: Event): void {
 		e.preventDefault();
 
-		this.orderService.itemEdit.emit(this.order.items[this.selectedIndex]);
+		this.posService.itemEdit.emit(this.order.items[this.selectedIndex]);
 	}
 
 	onArrowLeftKey(e: Event): void {
@@ -67,7 +67,7 @@ export class OrderComponent {
 		if (this.order.items.length === 0) return;
 
 		const item = this.order.items[this.selectedIndex];
-		this.orderService.decreaseQuantity(item);
+		this.posService.decreaseItemQuantity(item);
 	}
 
 	onArrowRightKey(e: Event): void {
@@ -76,18 +76,18 @@ export class OrderComponent {
 		if (this.order.items.length === 0) return;
 
 		const item = this.order.items[this.selectedIndex];
-		this.orderService.increaseQuantity(item);
+		this.posService.increaseItemQuantity(item);
 	}
 
 	onDeleteKey(e: Event): void {
 		e.preventDefault();
 
 		const item = this.order.items[this.selectedIndex];
-		this.orderService.delete(item);
+		this.posService.deleteItem(item);
 	}
 
 	editItem(item: OrderItem): void {
-		this.orderService.itemEdit.emit(item);
+		this.posService.itemEdit.emit(item);
 	}
 
 	private onItemEdit(item: OrderItem): void {
