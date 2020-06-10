@@ -5,12 +5,15 @@ import { OrderItem } from '@app/models/pos/order-item';
 import { PosOrderRepository } from '@app/repositories/pos-order-repository';
 import { PosItemRepository } from '@app/repositories/pos-item-repository';
 import { OrderRepository } from '../repositories/order-repository';
+import { Subject, Observable } from 'rxjs';
+import { debounceTime, buffer } from 'rxjs/operators';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class PosService {
 	private _order: Order;
+	private readonly updateQuantity = new Subject<OrderItem>();
 
 	get order(): Order {
 		return this._order;
@@ -27,6 +30,17 @@ export class PosService {
 		private orderRepo: OrderRepository
 	) {
 		this._order = this.posOrderRepo.order;
+		const debounce = this.updateQuantity.pipe(debounceTime(500));
+		this.updateQuantity
+			.pipe(buffer(debounce))
+			.subscribe((items: OrderItem[]) => {
+				const set = new Set<OrderItem>(items);
+				for (const item of set) {
+					this.posItemRepo.update(item.id, {
+						quantity: item.quantity
+					});
+				}
+			});
 
 		this.posOrderRepo.orderChange.subscribe(() => {
 			this._order = this.posOrderRepo.order;
@@ -67,9 +81,7 @@ export class PosService {
 		if (orderItem.quantity < 9999) {
 			orderItem.quantity++;
 
-			this.posItemRepo.update(orderItem.id, {
-				quantity: orderItem.quantity
-			});
+			this.updateQuantity.next(orderItem);
 		}
 	}
 
@@ -77,9 +89,7 @@ export class PosService {
 		if (orderItem.quantity > 1) {
 			orderItem.quantity--;
 
-			this.posItemRepo.update(orderItem.id, {
-				quantity: orderItem.quantity
-			});
+			this.updateQuantity.next(orderItem);
 		}
 	}
 
