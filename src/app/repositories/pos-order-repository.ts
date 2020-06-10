@@ -41,7 +41,7 @@ export class PosOrderRepository {
 		}
 	}
 
-	verifyId(): boolean {
+	private verifyId(): boolean {
 		if (
 			moment(this._order.createDate).startOf('day') < moment().startOf('day')
 		) {
