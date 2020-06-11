@@ -14,6 +14,8 @@ import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 
 import { AppComponent } from './app.component';
+import { PosPageComponent } from './components/pos-page/pos-page.component';
+
 import { OrderComponent } from './components/order/order.component';
 import { OrderItemComponent } from './components/order-item/order-item.component';
 import { SearchComponent } from './components/search/search.component';
@@ -37,6 +39,8 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 
 @NgModule({
 	declarations: [
+		PosPageComponent,
+
 		AppComponent,
 		OrderComponent,
 		OrderItemComponent,
