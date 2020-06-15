@@ -36,6 +36,8 @@ export class Str {
 }
 
 export class Data {
+	static readonly skipMerge = new Object();
+
 	static keep(obj: any): void {
 		obj.__keep = true;
 	}
@@ -52,15 +54,33 @@ export class Data {
 		return args.join('::').toLowerCase();
 	}
 
-	static merge(ref: any, data: any, converter: any = {}): boolean {
+	static merge(ref: any, data: any, options: any = {}): boolean {
 		if (data == null) return false;
 
 		let dirty = false;
 		for (const k of Object.keys(data)) {
-			const value = converter[k] ? converter[k](data[k]) : data[k];
-			if (ref[k] !== value) {
-				ref[k] = value;
-				dirty = true;
+			if (options[k] !== this.skipMerge) {
+				let value = data[k];
+				if (options[k] instanceof Function) {
+					value = options[k](value);
+					if (ref[k] !== value) {
+						ref[k] = value;
+						dirty = true;
+					}
+				} else {
+					value =
+						options[k] && options[k].converter
+							? options[k].converter(value)
+							: value;
+					if (
+						options[k] && options[k].equality
+							? !options[k].equality(ref[k], value)
+							: ref[k] !== value
+					) {
+						ref[k] = value;
+						dirty = true;
+					}
+				}
 			}
 		}
 
