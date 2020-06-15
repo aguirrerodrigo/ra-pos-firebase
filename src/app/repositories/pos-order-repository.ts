@@ -1,69 +1,74 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
 import { Order } from '@app/models/pos/order';
-import { Data } from '@app/utils';
-import * as moment from 'moment';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
+import moment from 'moment';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class PosOrderRepository {
-	private _order: Order = new Order();
+	constructor(private db: AngularFireDatabase) {}
 
-	get order(): Order {
-		return this._order;
-	}
-
-	readonly orderChange = new EventEmitter();
-
-	constructor(private db: AngularFireDatabase) {
-		db.object('pos/order')
+	get(posId: any): Observable<Order> {
+		return this.db
+			.object(`pos/${posId}/order`)
 			.valueChanges()
-			.subscribe((data: any) => {
-				this.merge(data);
-			});
+			.pipe(
+				tap((v: any) =>
+					console.log(`PosOrderRepository.get: ${JSON.stringify(v)}`)
+				),
+				map((data: any) => {
+					if (data == null || data.id == null) {
+						return null;
+					} else {
+						const order = new Order(data.id);
+						order.createDate = new Date(data.createDate);
+						return order;
+					}
+				})
+			);
 	}
 
-	merge(data: any): void {
-		if (
-			Data.merge(this._order, data, {
-				createDate: (value: any): Date => new Date(value),
-				checkoutDate: (value: any): Date => new Date(value)
+	createId(): Promise<any> {
+		return this.db.database
+			.ref('pos/_shared/last')
+			.transaction((t: any) => {
+				t = t || {};
+				t.id = t.id || 0;
+
+				if (
+					t.createDate != null &&
+					moment(t.createDate).startOf('day') < moment().startOf('day')
+				) {
+					t.id = 1;
+				} else {
+					t.id++;
+				}
+
+				t.createDate = new Date().toISOString();
+				console.log(`PosOrderRepository.createId: ${JSON.stringify(t)}`);
+				return t;
 			})
-		) {
-			if (this.verifyId()) {
-				this.db.object('pos/order').set({
-					id: this._order.id,
-					createDate: this._order.createDate.toISOString()
-				});
-			}
-			this.orderChange.emit();
-		}
+			.then((r: any) => r.snapshot.val().id);
 	}
 
-	private verifyId(): boolean {
-		if (
-			moment(this._order.createDate).startOf('day') < moment().startOf('day')
-		) {
-			this._order.id = 1;
-			this.order.createDate = new Date();
-			return true;
-		}
-		return false;
+	update(posId: any, data: any): Promise<void> {
+		console.log(`PosOrderRepository.update: ${JSON.stringify(data)}`);
+		return this.db.object(`pos/${posId}/order`).update(data);
 	}
 
-	new(): void {
-		this._order = new Order(this._order.id + 1);
-		this.verifyId();
-		this.orderChange.emit();
-
-		this.db.object('pos/order').set({
-			id: this._order.id,
-			createDate: this._order.createDate.toISOString()
+	save(posId: any, order: Order): Promise<void> {
+		console.log(`PosOrderRepository.save: ${JSON.stringify(order)}`);
+		return this.db.object(`pos/${posId}/order`).set({
+			id: order.id,
+			createDate: order.createDate.toISOString()
 		});
 	}
 
-	update(data: any): void {
-		this.db.object('pos/order').update(data);
+	delete(posId: any): Promise<void> {
+		console.log('PosOrderRepository.delete');
+		return this.db.object(`pos/${posId}/order`).remove();
 	}
 }

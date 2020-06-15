@@ -1,130 +1,68 @@
-import { Injectable, EventEmitter } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { OrderItem } from '@app/models/pos/order-item';
 import { AngularFireDatabase } from '@angular/fire/database';
-import { Data, Str } from '@app/utils';
+import { Observable } from 'rxjs';
+import { tap, map } from 'rxjs/operators';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class PosItemRepository {
-	private nameAndPriceMap = new Map<any, OrderItem>();
-	private idMap = new Map<any, OrderItem>();
-	private set = new Set<OrderItem>();
+	constructor(private db: AngularFireDatabase) {}
 
-	get list(): OrderItem[] {
-		return [...this.set];
-	}
-	listChange = new EventEmitter();
-
-	constructor(private db: AngularFireDatabase) {
-		db.list('pos/items')
+	list(posId: any): Observable<OrderItem[]> {
+		return this.db
+			.list(`pos/${posId}/items`)
 			.valueChanges()
-			.subscribe((items: any[]) => {
-				this.merge(items);
-			});
+			.pipe(
+				tap((v: any) =>
+					console.log(`PosItemRepository.get: ${JSON.stringify(v)}`)
+				),
+				map((items: any[]) => {
+					items = items || [];
+					const result: OrderItem[] = [];
+					for (const item of items) {
+						const orderItem = new OrderItem();
+						orderItem.custom = item.custom || false;
+						orderItem.description = item.description;
+						orderItem.id = item.id;
+						orderItem.name = item.name;
+						orderItem.price = item.price || 0;
+						orderItem.quantity = item.quantity || 0;
+
+						result.push(orderItem);
+					}
+					return result;
+				})
+			);
 	}
 
-	private merge(items: any[]): void {
-		let dirty = false;
+	createId(): Promise<any> {
+		const id = this.db.createPushId();
+		console.log(`PosItemRepository.createId: ${id}`);
 
-		for (const item of items) {
-			let ref = this.getById(item.id);
-			if (ref != null) {
-				const name = ref.name;
-				const price = ref.price;
-				if (Data.merge(ref, item)) {
-					this.nameAndPriceMap.delete(Data.key(name, price));
-					this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
-					dirty = true;
-				}
-			} else {
-				ref = new OrderItem();
-				Data.merge(ref, item);
-				this.idMap.set(ref.id, ref);
-				this.nameAndPriceMap.set(Data.key(ref.name, ref.price), ref);
-				this.set.add(ref);
-				dirty = true;
-			}
-
-			Data.keep(ref);
-		}
-
-		for (const ref of this.set) {
-			if (Data.isKeep(ref) !== true) {
-				this.idMap.delete(ref.id);
-				this.nameAndPriceMap.delete(Data.key(ref.name, ref.price));
-				this.set.delete(ref);
-				dirty = true;
-			} else {
-				Data.clearKeep(ref);
-			}
-		}
-
-		if (dirty) {
-			this.listChange.emit();
-		}
+		return Promise.resolve(id);
 	}
 
-	clear(): void {
-		this.nameAndPriceMap.clear();
-		this.idMap.clear();
-		this.set.clear();
-		this.listChange.emit();
-
-		this.db.object('pos/items').remove();
+	update(posId: any, id: any, data: any): Promise<void> {
+		console.log(`PosItemRepository.update: ${JSON.stringify({ id, data })}`);
+		return this.db.object(`pos/${posId}/items/${id}`).update(data);
 	}
 
-	getById(id: string): OrderItem {
-		return this.idMap.get(id);
+	save(posId: any, orderItem: OrderItem): Promise<void> {
+		console.log(`PosItemRepository.save: ${JSON.stringify(orderItem)}`);
+		return this.db
+			.object(`pos/${posId}/items/${orderItem.id}`)
+			.set(orderItem);
 	}
 
-	getByNameAndPrice(name: string, price: number): OrderItem {
-		return this.nameAndPriceMap.get(Data.key(name, price));
+	delete(posId: any, item: OrderItem): Promise<void> {
+		console.log(`PosItemRepository.delete: ${JSON.stringify(item)}`);
+		return this.db.object(`pos/${posId}/items/${item.id}`).remove();
 	}
 
-	update(id: any, data: any): void {
-		this.db.object('pos/items/' + id).update(data);
-	}
-
-	save(orderItem: OrderItem): void {
-		if (orderItem.id == null) {
-			this.add(orderItem);
-		} else {
-			const ref = this.getById(orderItem.id);
-			if (ref == null) {
-				this.add(orderItem);
-			} else {
-				Data.merge(ref, orderItem);
-
-				this.db.object('pos/items/' + orderItem.id).update(orderItem);
-			}
-		}
-	}
-
-	private add(orderItem: OrderItem): void {
-		if (Str.isNullOrWhiteSpace(orderItem.id)) {
-			orderItem.id = this.db.createPushId();
-		}
-		this.idMap.set(orderItem.id, orderItem);
-		this.nameAndPriceMap.set(
-			Data.key(orderItem.name, orderItem.price),
-			orderItem
-		);
-		this.set.add(orderItem);
-		this.listChange.emit();
-
-		this.db.object('pos/items/' + orderItem.id).set(orderItem);
-	}
-
-	delete(orderItem: OrderItem): void {
-		const ref = this.idMap.get(orderItem.id);
-		if (ref != null) {
-			this.idMap.delete(ref.id);
-			this.nameAndPriceMap.delete(Data.key(ref.name, ref.price));
-			this.set.delete(ref);
-			this.listChange.emit();
-
-			this.db.object('pos/items/' + ref.id).remove();
-		}
+	clear(posId: any): Promise<void> {
+		console.log('PosItemRepository.clear');
+		return this.db.object(`pos/${posId}/items`).remove();
 	}
 }

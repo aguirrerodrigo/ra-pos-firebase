@@ -11,9 +11,11 @@ import { PosService } from '@app/services/pos.service';
 export class PosPageComponent {
 	constructor(
 		private route: ActivatedRoute,
+		private posSerivce: PosService,
 		private pageService: PageService
 	) {
 		const id = this.route.snapshot.paramMap.get('posId');
+		this.posSerivce.init(id);
 		this.pageService.pageTitle = 'POS ' + id;
 		this.pageService.windowTitle = 'POS ' + id;
 	}

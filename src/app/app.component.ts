@@ -10,6 +10,7 @@ import { PageService } from '@app/services/page.service';
 export class AppComponent {
 	version = Package.version;
 	title = 'POS';
+	showNavMenu = false;
 
 	constructor(private pageService: PageService) {
 		this.pageService.pageTitleChange.subscribe(

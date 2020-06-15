@@ -5,15 +5,23 @@ import { OrderItem } from '@app/models/pos/order-item';
 import { PosOrderRepository } from '@app/repositories/pos-order-repository';
 import { PosItemRepository } from '@app/repositories/pos-item-repository';
 import { OrderRepository } from '../repositories/order-repository';
-import { Subject, Observable } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { debounceTime, buffer } from 'rxjs/operators';
+import { OrderItemSet } from './models/order-item-set';
+import { Data } from '@app/utils';
+import moment from 'moment';
 
 @Injectable({
 	providedIn: 'root'
 })
 export class PosService {
-	private _order: Order;
+	private _order = new Order();
+	private items = new OrderItemSet();
+	private orderSubscription: Subscription;
+	private itemsSubscription: Subscription;
+	private posId = 1;
 	private readonly updateQuantity = new Subject<OrderItem>();
+	private readonly debounce = this.updateQuantity.pipe(debounceTime(500));
 
 	get order(): Order {
 		return this._order;
@@ -29,27 +37,100 @@ export class PosService {
 		private posItemRepo: PosItemRepository,
 		private orderRepo: OrderRepository
 	) {
-		this._order = this.posOrderRepo.order;
-		const debounce = this.updateQuantity.pipe(debounceTime(500));
 		this.updateQuantity
-			.pipe(buffer(debounce))
+			.pipe(buffer(this.debounce))
 			.subscribe((items: OrderItem[]) => {
 				const set = new Set<OrderItem>(items);
 				for (const item of set) {
-					this.posItemRepo.update(item.id, {
+					this.posItemRepo.update(this.posId, item.id, {
 						quantity: item.quantity
 					});
 				}
 			});
+	}
 
-		this.posOrderRepo.orderChange.subscribe(() => {
-			this._order = this.posOrderRepo.order;
-			this.orderChange.emit();
+	init(posId: any): void {
+		if (posId == null) return;
+		if (this.orderSubscription != null) this.orderSubscription.unsubscribe();
+		if (this.itemsSubscription != null) this.itemsSubscription.unsubscribe();
+
+		this.posId = posId;
+		this.orderSubscription = this.posOrderRepo
+			.get(posId)
+			.subscribe((order: Order) => this.mergeOrder(order));
+
+		this.itemsSubscription = this.posItemRepo
+			.list(posId)
+			.subscribe((items: OrderItem[]) => this.mergeItems(items));
+	}
+
+	private mergeOrder(order: Order): void {
+		if (order == null) {
+			this.createNewId();
+			console.log('PosService.mergeOrder: no order found, new id created.');
+		} else {
+			if (
+				Data.merge(
+					this._order,
+					{ id: order.id, createDate: order.createDate },
+					{
+						createDate: {
+							equality: (value1: any, value2: any): boolean =>
+								moment(value1).isSame(value2)
+						}
+					}
+				)
+			) {
+				if (
+					moment(this._order.createDate).startOf('day') <
+					moment().startOf('day')
+				) {
+					this.createNewId();
+					console.log('PosService.mergeOrder: merged, new id created.');
+				} else {
+					console.log('PosService.mergeOrder: merged, id retained.');
+				}
+			} else {
+				console.log('PosService.mergeOrder: no merge done.');
+			}
+		}
+	}
+
+	private createNewId(): Promise<void> {
+		return this.posOrderRepo.createId().then((id: any) => {
+			this._order.id = id;
+			this._order.createDate = new Date();
+			this.posOrderRepo.save(this.posId, this._order);
 		});
-		this.posItemRepo.listChange.subscribe(() => {
-			this.order.items = this.posItemRepo.list;
+	}
+
+	private mergeItems(items: OrderItem[]): void {
+		let dirty = false;
+
+		for (const item of items) {
+			const merge = this.items.merge(item);
+			if (merge.success) {
+				dirty = true;
+			}
+			Data.keep(merge.ref);
+		}
+
+		for (const ref of this.items.toArray()) {
+			if (Data.isKeep(ref) !== true) {
+				this.items.delete(ref);
+				dirty = true;
+			} else {
+				Data.clearKeep(ref);
+			}
+		}
+
+		this.order.items = [...this.items.toArray()];
+		if (dirty) {
+			console.log('PosService.mergeItems: merged.');
 			this.orderUpdate.emit();
-		});
+		} else {
+			console.log('PosService.mergeItems: no merge done.');
+		}
 	}
 
 	addItem(menuItem: MenuItem, quantity: number = 1): void {
@@ -59,21 +140,27 @@ export class PosService {
 
 		if (this.order.items.length === 0) {
 			this.order.createDate = new Date();
-			this.posOrderRepo.update({
+			this.posOrderRepo.update(this.posId, {
 				createDate: this.order.createDate.toISOString()
 			});
 		}
 
-		const ref = this.posItemRepo.getByNameAndPrice(
-			menuItem.name,
-			menuItem.price
-		);
+		const ref = this.items.getByNameAndPrice(menuItem.name, menuItem.price);
 		if (ref != null) {
 			ref.quantity += quantity;
-			this.posItemRepo.save(ref);
+			this.posItemRepo.update(this.posId, ref.id, {
+				quantity: ref.quantity
+			});
 		} else {
-			this.posItemRepo.save(new OrderItem(menuItem, quantity));
+			this.posItemRepo.createId().then((id: any) => {
+				const orderItem = new OrderItem(menuItem, quantity);
+				orderItem.id = id;
+				this.items.set(orderItem);
+				this.order.items = [...this.items.toArray()];
+				this.posItemRepo.save(this.posId, orderItem);
+			});
 		}
+
 		this.orderUpdate.emit();
 	}
 
@@ -82,6 +169,7 @@ export class PosService {
 			orderItem.quantity++;
 
 			this.updateQuantity.next(orderItem);
+			this.orderUpdate.emit();
 		}
 	}
 
@@ -90,24 +178,31 @@ export class PosService {
 			orderItem.quantity--;
 
 			this.updateQuantity.next(orderItem);
+			this.orderUpdate.emit();
 		}
 	}
 
 	saveItem(orderItem: OrderItem): void {
-		this.posItemRepo.save(orderItem);
+		this.items.merge(orderItem);
+		this.posItemRepo.save(this.posId, orderItem);
 		this.orderUpdate.emit();
 	}
 
 	deleteItem(orderItem: OrderItem): void {
-		this.posItemRepo.delete(orderItem);
+		this.items.delete(orderItem);
+		this.order.items = [...this.items.toArray()];
+		this.posItemRepo.delete(this.posId, orderItem);
 		this.orderUpdate.emit();
 	}
 
 	checkout(): void {
 		this.order.checkoutDate = new Date();
 		this.orderRepo.add(this.order);
-		this.posOrderRepo.new();
-		this.posItemRepo.clear();
+
+		this._order = new Order();
+		this.createNewId();
+		this.posItemRepo.clear(this.posId);
+
 		this.orderChange.emit();
 	}
 }

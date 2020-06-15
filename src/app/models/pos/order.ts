@@ -42,5 +42,5 @@ export class Order {
 		return this.cash - this.afterDiscount;
 	}
 
-	constructor(public id: any = 1) {}
+	constructor(public id: any = 0) {}
 }

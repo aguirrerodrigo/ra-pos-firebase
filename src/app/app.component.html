@@ -1,10 +1,43 @@
 <div>
-	<nav>
-		<h2>
-			{{ title }}
-		</h2>
-		<span class="version">v{{ version }}</span>
-	</nav>
+	<div class="pos-f-t">
+		<nav>
+			<button
+				class="navbar-toggler"
+				type="button"
+				(click)="showNavMenu = !showNavMenu"
+			>
+				<span class="navbar-toggler-icon"></span>
+			</button>
+			<h2>
+				{{ title }}
+			</h2>
+			<span class="version">v{{ version }}</span>
+		</nav>
+		<nav class="nav-menu" [class.collapse]="!showNavMenu" id="nav-menu">
+			<ul class="navbar-nav">
+				<li class="nav-item">
+					<a class="nav-link" href="/">Home</a>
+				</li>
+				<li class="nav-item">
+					<div ngbDropdown>
+						<a class="nav-link dropdown" ngbDropdownToggle tabindex="0">
+							POS
+						</a>
+						<div class="dropdown-menu" ngbDropdownMenu>
+							<a href="/pos/1" ngbDropdownItem>POS 1</a>
+							<a href="/pos/2" ngbDropdownItem>POS 2</a>
+							<a href="/pos/3" ngbDropdownItem>POS 3</a>
+							<a href="/pos/4" ngbDropdownItem>POS 4</a>
+							<a href="/pos/5" ngbDropdownItem>POS 5</a>
+						</div>
+					</div>
+				</li>
+				<li class="nav-item">
+					<a class="nav-link" href="/kitchen">Kitchen</a>
+				</li>
+			</ul>
+		</nav>
+	</div>
 	<div class="app-container">
 		<router-outlet></router-outlet>
 	</div>
