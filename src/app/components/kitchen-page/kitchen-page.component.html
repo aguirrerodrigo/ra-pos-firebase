@@ -1,6 +1,9 @@
-<div style="margin: 10px 0px;">
-	<app-kitchen-order
-		*ngFor="let order of orders; index as i"
-		[order]="order"
-	></app-kitchen-order>
+<div class="container-fluid" style="margin-top: 10px;">
+	<div class="d-flex flex-wrap">
+		<app-kitchen-order
+			class="mr-3"
+			*ngFor="let order of orders; index as i"
+			[order]="order"
+		></app-kitchen-order>
+	</div>
 </div>

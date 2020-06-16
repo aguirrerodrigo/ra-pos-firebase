@@ -2,9 +2,11 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { Order } from '@app/models/pos/order';
 import { MenuItem } from '@app/models/menu-item';
 import { OrderItem } from '@app/models/pos/order-item';
+import { Order as KitchenOrder } from '@app/models/kitchen/order';
+import { OrderItem as KitchenOrderItem } from '@app/models/kitchen/order-item';
 import { PosOrderRepository } from '@app/repositories/pos-order-repository';
 import { PosItemRepository } from '@app/repositories/pos-item-repository';
-import { OrderRepository } from '../repositories/order-repository';
+import { KitchenOrderRepository } from '@app/repositories/kitchen-order-repository';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, buffer } from 'rxjs/operators';
 import { OrderItemSet } from './models/order-item-set';
@@ -35,7 +37,7 @@ export class PosService {
 	constructor(
 		private posOrderRepo: PosOrderRepository,
 		private posItemRepo: PosItemRepository,
-		private orderRepo: OrderRepository
+		private kitchenOrderRepo: KitchenOrderRepository
 	) {
 		this.updateQuantity
 			.pipe(buffer(this.debounce))
@@ -197,12 +199,36 @@ export class PosService {
 
 	checkout(): void {
 		this.order.checkoutDate = new Date();
-		this.orderRepo.add(this.order);
+		this.saveKitchenOrder();
 
 		this._order = new Order();
 		this.createNewId();
 		this.posItemRepo.clear(this.posId);
 
 		this.orderChange.emit();
+	}
+
+	saveKitchenOrder(): void {
+		const kitchenOrder = new KitchenOrder();
+		kitchenOrder.id = this._order.id;
+		kitchenOrder.startDate = this._order.checkoutDate;
+
+		const map = new Map<string, number>();
+		for (const item of this._order.items) {
+			if (map.has(item.name)) {
+				map.set(item.name, map.get(item.name) + item.quantity);
+			} else {
+				map.set(item.name, item.quantity);
+			}
+		}
+
+		for (const item of map.entries()) {
+			const orderItem = new KitchenOrderItem();
+			orderItem.name = item[0];
+			orderItem.quantity = item[1];
+			kitchenOrder.items.push(orderItem);
+		}
+
+		this.kitchenOrderRepo.save(kitchenOrder);
 	}
 }

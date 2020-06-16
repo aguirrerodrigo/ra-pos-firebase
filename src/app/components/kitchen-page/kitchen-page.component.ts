@@ -6,7 +6,7 @@ import { Order } from '@app/models/kitchen/order';
 @Component({
 	selector: 'app-kitchen-page',
 	templateUrl: './kitchen-page.component.html',
-	styleUrls: ['./kitchen-page.component.css']
+	styleUrls: ['./kitchen-page.component.scss']
 })
 export class KitchenPageComponent {
 	orders: Order[] = [];
