@@ -18,6 +18,10 @@ export class PaymentComponent {
 		return this.order.afterDiscount <= this.order.cash;
 	}
 
+	get hasOrderItems(): boolean {
+		return this.order.items.length > 0;
+	}
+
 	get discount(): string {
 		return this._discount;
 	}

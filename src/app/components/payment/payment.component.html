@@ -72,7 +72,7 @@
 			'checkout-success': canPay && !confirm,
 			'checkout-primary': canPay && confirm
 		}"
-		[disabled]="!canPay ? true : null"
+		[disabled]="!canPay || !hasOrderItems ? true : null"
 		(click)="checkout()"
 	>
 		Checkout
