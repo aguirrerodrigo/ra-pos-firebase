@@ -29,10 +29,6 @@ nav .dropdown-menu {
 	z-index: 2000;
 }
 
-.app-container {
-	@extend .container-fluid;
-}
-
 .version {
 	font-size: small;
 	color: #cccccc;

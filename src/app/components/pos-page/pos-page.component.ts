@@ -6,7 +6,7 @@ import { PosService } from '@app/services/pos.service';
 @Component({
 	selector: 'app-pos-page',
 	templateUrl: './pos-page.component.html',
-	styleUrls: ['./pos-page.component.css']
+	styleUrls: ['./pos-page.component.scss']
 })
 export class PosPageComponent {
 	constructor(
