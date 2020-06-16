@@ -36,6 +36,8 @@ import { AngularFireModule } from '@angular/fire';
 import { AngularFireAnalyticsModule } from '@angular/fire/analytics';
 import { AngularFireDatabaseModule } from '@angular/fire/database';
 import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { KitchenPageComponent } from './components/kitchen-page/kitchen-page.component';
+import { KitchenOrderComponent } from './components/kitchen-order/kitchen-order.component';
 
 @NgModule({
 	declarations: [
@@ -55,7 +57,11 @@ import { AngularFirestoreModule } from '@angular/fire/firestore';
 		ScrollIntoViewDirective,
 		SelectOnFocusDirective,
 
-		PhpCurrencyPipe
+		PhpCurrencyPipe,
+
+		KitchenPageComponent,
+
+		KitchenOrderComponent
 	],
 	imports: [
 		BrowserModule,
