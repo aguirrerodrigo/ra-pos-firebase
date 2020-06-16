@@ -1,0 +1,8 @@
+<div class="card border-secondary mb-3" style="max-width: 18rem;">
+	<div class="card-header">Order {{ order.id }}</div>
+	<div class="card-body text-secondary">
+		<div *ngFor="let item of order.items; index as i">
+			{{ item.name }} {{ item.quantity }}
+		</div>
+	</div>
+</div>
