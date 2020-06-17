@@ -1,4 +1,8 @@
 <div class="page-container">
+	<div class="order-info" *ngIf="orders.length <= 0">
+		<fa-icon [icon]="['fas', 'info-circle']"></fa-icon>
+		Orders will be automatically added when POS adds an order.
+	</div>
 	<div class="order-container">
 		<app-kitchen-order
 			class="order"
