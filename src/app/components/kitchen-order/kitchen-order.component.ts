@@ -1,11 +1,5 @@
-import {
-	Component,
-	Input,
-	Output,
-	EventEmitter,
-	OnDestroy
-} from '@angular/core';
-import { settings } from '@root/src/environments/settings';
+import { Component, Input, OnDestroy } from '@angular/core';
+import Settings from '@src/assets/json/settings.json';
 import { KitchenService } from '@app/services/kitchen.service';
 import { Order } from '@app/models/kitchen/order';
 import { interval, Subscription } from 'rxjs';
@@ -17,8 +11,8 @@ import moment from 'moment';
 	styleUrls: ['./kitchen-order.component.scss']
 })
 export class KitchenOrderComponent implements OnDestroy {
-	private warning = moment.duration(settings.kitchen.warning);
-	private danger = moment.duration(settings.kitchen.danger);
+	private warning = moment.duration(Settings.kitchen.warning);
+	private danger = moment.duration(Settings.kitchen.danger);
 	private interval = interval(1000);
 	private intervalSubscription: Subscription;
 	private _order: Order;

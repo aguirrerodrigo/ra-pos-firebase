@@ -32,11 +32,11 @@ export class MenuSearchComponent {
 		private menuService: MenuService,
 		private posService: PosService
 	) {
-		this.menuService.menuChange.subscribe(() => this.updateSearchItems());
+		this.setSearchItems();
 		this.posService.orderChange.subscribe(() => this.search.focus());
 	}
 
-	private updateSearchItems(): void {
+	private setSearchItems(): void {
 		const buffer: SearchItem[] = [];
 
 		const menu = this.menuService.menu;
