@@ -1,8 +1,8 @@
-<div class="container-fluid mt-3">
-	<div class="d-flex flex-wrap">
+<div class="page-container">
+	<div class="order-container">
 		<app-kitchen-order
-			class="mr-3"
-			*ngFor="let order of orders; index as i"
+			class="order"
+			*ngFor="let order of orders"
 			[order]="order"
 		></app-kitchen-order>
 	</div>

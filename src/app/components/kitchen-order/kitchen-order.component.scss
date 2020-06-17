@@ -1,11 +1,90 @@
 @import '~bootstrap/scss/bootstrap';
 
-.item {
+.order-container {
+	@extend .card, .mb-3;
+	min-width: 260px;
+}
+
+.order-container-success {
+	@extend .border-success;
+}
+
+.order-container-warning {
+	@extend .border-warning;
+}
+
+.order-container-danger {
+	@extend .border-danger;
+}
+
+.order-header {
+	@extend .card-header;
+}
+
+.order-header-success {
+	@extend .text-success;
+}
+
+.order-header-warning {
+	@extend .text-warning;
+}
+
+.order-header-danger {
+	@extend .text-danger;
+}
+
+.order-body {
+	@extend .card-body, .text-dark;
 	font-size: 1.1rem;
 	font-weight: 500;
 }
 
+.order-footer {
+	@extend .card-footer, .d-flex, .flex-nowrap, .align-items-center;
+}
+
 .elapsed {
+	@extend .float-left, .mr-2;
 	font-size: 1.2rem;
 	font-weight: 500;
+}
+
+.elapsed-success {
+	@extend .text-success;
+}
+
+.elapsed-warning {
+	@extend .text-warning;
+}
+
+.elapsed-danger {
+	@extend .text-danger;
+}
+
+.complete-container {
+	@extend .ml-auto;
+}
+
+.cancel {
+	@extend .btn, .btn-secondary, .ml-1;
+}
+
+.complete {
+	@extend .btn, .ml-1;
+}
+
+.complete-primary {
+	@extend .btn-primary;
+}
+
+.complete-success {
+	@extend .btn-outline-success;
+}
+
+.complete-warning {
+	@extend .btn-outline-warning;
+}
+
+.complete-danger {
+	@extend .btn-danger;
 }

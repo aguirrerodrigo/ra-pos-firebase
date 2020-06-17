@@ -1,59 +1,53 @@
 <div
-	class="card mb-3"
+	class="order-container"
 	[ngClass]="{
-		'border-success': status === 'success',
-		'border-warning': status === 'warning',
-		'border-danger': status === 'danger'
+		'order-container-success': status === 'success',
+		'order-container-warning': status === 'warning',
+		'order-container-danger': status === 'danger'
 	}"
-	style="min-width: 260px;"
 >
 	<div
-		class="card-header"
+		class="order-header"
 		[ngClass]="{
-			'text-success': status === 'success',
-			'text-warning': status === 'warning',
-			'text-danger': status === 'danger'
+			'order-header-success': status === 'success',
+			'order-header-warning': status === 'warning',
+			'order-header-danger': status === 'danger'
 		}"
 	>
 		Order {{ order.id }}
 	</div>
-	<div class="card-body text-dark">
-		<div class="item" *ngFor="let item of order.items; index as i">
+	<div class="order-body">
+		<div *ngFor="let item of order.items">
 			{{ item.quantity }} {{ item.name }}
 		</div>
 	</div>
 
-	<div
-		class="card-footer d-flex flex-nowrap bg-transparent align-items-center"
-	>
+	<div class="order-footer">
 		<div
 			*ngIf="!confirm"
-			class="float-left mr-2 elapsed"
+			class="elapsed"
 			[ngClass]="{
-				'text-success': status === 'success',
-				'text-warning': status === 'warning',
-				'text-danger': status === 'danger'
+				'elapsed-success': status === 'success',
+				'elapsed-warning': status === 'warning',
+				'elapsed-danger': status === 'danger'
 			}"
 		>
 			{{ elapsed | date: 'mm:ss' }}
 		</div>
-		<div class="complete-container ml-auto">
+		<div class="complete-container">
 			<ng-container *ngIf="confirm">
 				Sure?
-				<button
-					class="btn btn-secondary cancel ml-1"
-					(click)="confirm = false"
-				>
+				<button class="cancel" (click)="confirm = false">
 					Cancel
 				</button>
 			</ng-container>
 			<button
-				class="btn ml-1"
+				class="complete"
 				[ngClass]="{
-					'btn-primary': confirm,
-					'btn-outline-success': !confirm && status === 'success',
-					'btn-outline-warning': !confirm && status === 'warning',
-					'btn-danger': !confirm && status === 'danger'
+					'complete-primary': confirm,
+					'complete-success': !confirm && status === 'success',
+					'complete-warning': !confirm && status === 'warning',
+					'complete-danger': !confirm && status === 'danger'
 				}"
 				(click)="complete()"
 			>
