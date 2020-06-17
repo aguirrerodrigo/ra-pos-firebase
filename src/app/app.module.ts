@@ -9,7 +9,6 @@ import {
 	FontAwesomeModule,
 	FaIconLibrary
 } from '@fortawesome/angular-fontawesome';
-import { fab } from '@fortawesome/free-brands-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 
@@ -82,6 +81,6 @@ import { KitchenOrderComponent } from './components/kitchen-order/kitchen-order.
 })
 export class AppModule {
 	constructor(faIconLibrary: FaIconLibrary) {
-		faIconLibrary.addIconPacks(fab, far, fas);
+		faIconLibrary.addIconPacks(far, fas);
 	}
 }
