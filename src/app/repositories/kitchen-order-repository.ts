@@ -5,6 +5,7 @@ import { Order } from '@app/models/kitchen/order';
 import { OrderItem } from '@app/models/kitchen/order-item';
 import { Observable } from 'rxjs';
 import { tap, map } from 'rxjs/operators';
+import moment from 'moment';
 
 @Injectable({
 	providedIn: 'root'
@@ -53,6 +54,31 @@ export class KitchenOrderRepository {
 		}
 
 		return result;
+	}
+
+	createId(): Promise<any> {
+		return this.db.database
+			.ref('kitchen/_shared/last')
+			.transaction((t: any) => {
+				t = t || {};
+				t.id = t.id || 0;
+
+				if (
+					t.createDate != null &&
+					moment(t.createDate).startOf('day') < moment().startOf('day')
+				) {
+					t.id = 1;
+				} else {
+					t.id++;
+				}
+
+				t.createDate = new Date().toISOString();
+				console.log(
+					`KitchenOrderRepository.createId: ${JSON.stringify(t)}`
+				);
+				return t;
+			})
+			.then((r: any) => r.snapshot.val().id);
 	}
 
 	update(id: any, data: any): Promise<void> {

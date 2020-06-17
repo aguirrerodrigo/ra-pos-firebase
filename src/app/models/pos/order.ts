@@ -41,6 +41,4 @@ export class Order {
 	get change(): number {
 		return this.cash - this.afterDiscount;
 	}
-
-	constructor(public id: any = 0) {}
 }

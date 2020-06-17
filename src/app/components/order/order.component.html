@@ -11,7 +11,7 @@
 	<div class="header">
 		<div class="title">
 			<span [class.can-hide]="order?.count > 0">
-				{{ title }}<span *ngIf="order.id > 0">&nbsp;#{{ order.id }}</span>
+				{{ title }}
 			</span>
 			<span [class.can-hide]="order.count > 0" *ngIf="order?.count > 0"
 				>&nbsp;-&nbsp;</span
