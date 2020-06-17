@@ -18,7 +18,7 @@ export class KitchenPageComponent {
 		this.pageService.pageTitle = 'Kitchen';
 		this.pageService.windowTitle = 'Kitchen';
 
-		this.kitchenService.orderChange.subscribe(
+		this.kitchenService.ordersChange.subscribe(
 			() => (this.orders = this.kitchenService.orders)
 		);
 	}

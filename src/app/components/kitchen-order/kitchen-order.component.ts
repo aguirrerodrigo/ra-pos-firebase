@@ -1,6 +1,14 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import {
+	Component,
+	Input,
+	Output,
+	EventEmitter,
+	OnDestroy
+} from '@angular/core';
+import { settings } from '@root/src/environments/settings';
+import { KitchenService } from '@app/services/kitchen.service';
 import { Order } from '@app/models/kitchen/order';
-import { interval } from 'rxjs';
+import { interval, Subscription } from 'rxjs';
 import moment from 'moment';
 
 @Component({
@@ -8,15 +16,15 @@ import moment from 'moment';
 	templateUrl: './kitchen-order.component.html',
 	styleUrls: ['./kitchen-order.component.scss']
 })
-export class KitchenOrderComponent {
-	private warningTime = '00:15:00';
-	private dangerTime = '00:30:00';
-	private warning = moment.duration(this.warningTime);
-	private danger = moment.duration(this.dangerTime);
+export class KitchenOrderComponent implements OnDestroy {
+	private warning = moment.duration(settings.kitchen.warning);
+	private danger = moment.duration(settings.kitchen.danger);
 	private interval = interval(1000);
+	private intervalSubscription: Subscription;
 	private _order: Order;
 	status: 'success' | 'warning' | 'danger' = 'success';
 	elapsed: Date;
+	confirm = false;
 
 	get order(): Order {
 		return this._order;
@@ -27,10 +35,14 @@ export class KitchenOrderComponent {
 		this.verifyTime();
 	}
 
-	@Output() readonly orderChange = new EventEmitter();
+	constructor(private kitchenService: KitchenService) {
+		this.intervalSubscription = this.interval.subscribe(() =>
+			this.verifyTime()
+		);
+	}
 
-	constructor() {
-		this.interval.subscribe(() => this.verifyTime());
+	ngOnDestroy(): void {
+		this.intervalSubscription.unsubscribe();
 	}
 
 	private verifyTime(): void {
@@ -43,6 +55,14 @@ export class KitchenOrderComponent {
 			this.status = 'success';
 		}
 		this.elapsed = moment().startOf('day').add(elapsed).toDate();
-		this.orderChange.emit();
+	}
+
+	complete(): void {
+		if (this.confirm) {
+			this.kitchenService.complete(this._order);
+			this.confirm = false;
+		} else {
+			this.confirm = true;
+		}
 	}
 }

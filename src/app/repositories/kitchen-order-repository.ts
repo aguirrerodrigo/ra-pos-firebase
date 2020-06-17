@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AngularFireDatabase } from '@angular/fire/database';
+import { DatabaseReference } from '@angular/fire/database/interfaces';
 import { Order } from '@app/models/kitchen/order';
 import { OrderItem } from '@app/models/kitchen/order-item';
 import { Observable } from 'rxjs';
@@ -13,7 +14,9 @@ export class KitchenOrderRepository {
 
 	list(): Observable<Order[]> {
 		return this.db
-			.list('kitchen/orders')
+			.list('kitchen/orders', (ref: DatabaseReference) =>
+				ref.orderByChild('id')
+			)
 			.valueChanges()
 			.pipe(
 				tap((items: any[]) =>
@@ -60,14 +63,22 @@ export class KitchenOrderRepository {
 	}
 
 	save(order: Order): Promise<void> {
-		const items = {};
-		for (const item of order.items) {
-			items[item.name] = item.quantity;
-		}
-		return this.db.object(`kitchen/orders/${order.id}`).set({
+		const data = {
 			id: order.id,
 			startDate: order.startDate.toISOString(),
-			items
-		});
+			items: {}
+		};
+
+		for (const item of order.items) {
+			data.items[item.name] = item.quantity;
+		}
+
+		console.log(`KitchenOrderRepository.save: ${JSON.stringify(data)}`);
+		return this.db.object(`kitchen/orders/${order.id}`).set(data);
+	}
+
+	delete(order: Order): Promise<void> {
+		console.log('PosOrderRepository.delete');
+		return this.db.object(`kitchen/orders/${order.id}`).remove();
 	}
 }
