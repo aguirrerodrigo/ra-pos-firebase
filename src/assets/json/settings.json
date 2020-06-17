@@ -1,4 +1,13 @@
 {
+	"pos": {
+		"devices": {
+			"POS 1": "/pos/1",
+			"POS 2": "/pos/2",
+			"POS 3": "/pos/3",
+			"Lance": "/pos/Lance",
+			"Redgie": "/pos/Redgie"
+		}
+	},
 	"kitchen": {
 		"warning": "00:15:00",
 		"danger": "00:30:00",

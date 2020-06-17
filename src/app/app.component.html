@@ -24,11 +24,12 @@
 							POS
 						</a>
 						<div class="dropdown-menu" ngbDropdownMenu>
-							<a href="/pos/1" ngbDropdownItem>POS 1</a>
-							<a href="/pos/2" ngbDropdownItem>POS 2</a>
-							<a href="/pos/3" ngbDropdownItem>POS 3</a>
-							<a href="/pos/4" ngbDropdownItem>POS 4</a>
-							<a href="/pos/5" ngbDropdownItem>POS 5</a>
+							<a
+								*ngFor="let device of devices"
+								[href]="device.url"
+								ngbDropdownItem
+								>{{ device.name }}</a
+							>
 						</div>
 					</div>
 				</li>
