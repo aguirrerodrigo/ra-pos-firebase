@@ -1,0 +1,13 @@
+@import '~bootstrap/scss/bootstrap';
+
+.page-container {
+	@extend .container-fluid, .mt-3;
+}
+
+.order-container {
+	@extend .d-flex, .flex-wrap;
+}
+
+.order {
+	@extend .mr-3;
+}
