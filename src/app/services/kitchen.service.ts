@@ -1,5 +1,5 @@
 import { Injectable, OnDestroy, EventEmitter } from '@angular/core';
-import { settings } from '@root/src/environments/settings';
+import Settings from '@src/assets/json/settings.json';
 import { KitchenOrderRepository } from '@app/repositories/kitchen-order-repository';
 import { Order } from '@app/models/kitchen/order';
 import { Data } from '@app/utils';
@@ -10,7 +10,7 @@ import moment from 'moment';
 	providedIn: 'root'
 })
 export class KitchenService implements OnDestroy {
-	private expired = moment.duration(settings.kitchen.expire);
+	private expired = moment.duration(Settings.kitchen.expire);
 	private interval = interval(1000);
 	private intervalSubscription: Subscription;
 	private _orders = new Map<any, Order>();
