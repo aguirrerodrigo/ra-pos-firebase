@@ -5,7 +5,7 @@
 		'border-warning': status === 'warning',
 		'border-danger': status === 'danger'
 	}"
-	style="min-width: 250px;"
+	style="min-width: 260px;"
 >
 	<div
 		class="card-header"
@@ -27,6 +27,7 @@
 		class="card-footer d-flex flex-nowrap bg-transparent align-items-center"
 	>
 		<div
+			*ngIf="!confirm"
 			class="float-left mr-2 elapsed"
 			[ngClass]="{
 				'text-success': status === 'success',
@@ -36,15 +37,28 @@
 		>
 			{{ elapsed | date: 'mm:ss' }}
 		</div>
-		<button
-			class="btn ml-auto"
-			[ngClass]="{
-				'btn-outline-success': status === 'success',
-				'btn-outline-warning': status === 'warning',
-				'btn-danger': status === 'danger'
-			}"
-		>
-			Complete
-		</button>
+		<div class="complete-container ml-auto">
+			<ng-container *ngIf="confirm">
+				Sure?
+				<button
+					class="btn btn-secondary cancel ml-1"
+					(click)="confirm = false"
+				>
+					Cancel
+				</button>
+			</ng-container>
+			<button
+				class="btn ml-1"
+				[ngClass]="{
+					'btn-primary': confirm,
+					'btn-outline-success': !confirm && status === 'success',
+					'btn-outline-warning': !confirm && status === 'warning',
+					'btn-danger': !confirm && status === 'danger'
+				}"
+				(click)="complete()"
+			>
+				Complete
+			</button>
+		</div>
 	</div>
 </div>
