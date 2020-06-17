@@ -23,35 +23,12 @@ export class PosOrderRepository {
 					if (data == null || data.id == null) {
 						return null;
 					} else {
-						const order = new Order(data.id);
+						const order = new Order();
 						order.createDate = new Date(data.createDate);
 						return order;
 					}
 				})
 			);
-	}
-
-	createId(): Promise<any> {
-		return this.db.database
-			.ref('pos/_shared/last')
-			.transaction((t: any) => {
-				t = t || {};
-				t.id = t.id || 0;
-
-				if (
-					t.createDate != null &&
-					moment(t.createDate).startOf('day') < moment().startOf('day')
-				) {
-					t.id = 1;
-				} else {
-					t.id++;
-				}
-
-				t.createDate = new Date().toISOString();
-				console.log(`PosOrderRepository.createId: ${JSON.stringify(t)}`);
-				return t;
-			})
-			.then((r: any) => r.snapshot.val().id);
 	}
 
 	update(posId: any, data: any): Promise<void> {
@@ -62,7 +39,6 @@ export class PosOrderRepository {
 	save(posId: any, order: Order): Promise<void> {
 		console.log(`PosOrderRepository.save: ${JSON.stringify(order)}`);
 		return this.db.object(`pos/${posId}/order`).set({
-			id: order.id,
 			createDate: order.createDate.toISOString()
 		});
 	}

@@ -62,7 +62,7 @@
 }
 
 .complete-container {
-	@extend .ml-auto;
+	@extend .ml-auto, .text-muted;
 }
 
 .cancel {

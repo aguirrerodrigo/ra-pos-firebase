@@ -67,14 +67,11 @@ export class PosService {
 	}
 
 	private mergeOrder(order: Order): void {
-		if (order == null) {
-			this.createNewId();
-			console.log('PosService.mergeOrder: no order found, new id created.');
-		} else {
+		if (order != null) {
 			if (
 				Data.merge(
 					this._order,
-					{ id: order.id, createDate: order.createDate },
+					{ createDate: order.createDate },
 					{
 						createDate: {
 							equality: (value1: any, value2: any): boolean =>
@@ -83,27 +80,11 @@ export class PosService {
 					}
 				)
 			) {
-				if (
-					moment(this._order.createDate).startOf('day') <
-					moment().startOf('day')
-				) {
-					this.createNewId();
-					console.log('PosService.mergeOrder: merged, new id created.');
-				} else {
-					console.log('PosService.mergeOrder: merged, id retained.');
-				}
+				console.log('PosService.mergeOrder: merged.');
 			} else {
 				console.log('PosService.mergeOrder: no merge done.');
 			}
 		}
-	}
-
-	private createNewId(): Promise<void> {
-		return this.posOrderRepo.createId().then((id: any) => {
-			this._order.id = id;
-			this._order.createDate = new Date();
-			this.posOrderRepo.save(this.posId, this._order);
-		});
 	}
 
 	private mergeItems(items: OrderItem[]): void {
@@ -198,37 +179,38 @@ export class PosService {
 	}
 
 	checkout(): void {
-		this.order.checkoutDate = new Date();
-		this.saveKitchenOrder();
+		this._order.checkoutDate = new Date();
+		this.saveKitchenOrder(this._order);
 
 		this._order = new Order();
-		this.createNewId();
 		this.posItemRepo.clear(this.posId);
 
 		this.orderChange.emit();
 	}
 
-	saveKitchenOrder(): void {
-		const kitchenOrder = new KitchenOrder();
-		kitchenOrder.id = this._order.id;
-		kitchenOrder.startDate = this._order.checkoutDate;
+	saveKitchenOrder(order: Order): void {
+		this.kitchenOrderRepo.createId().then((id: any) => {
+			const kitchenOrder = new KitchenOrder();
+			kitchenOrder.id = id;
+			kitchenOrder.startDate = order.checkoutDate;
 
-		const map = new Map<string, number>();
-		for (const item of this._order.items) {
-			if (map.has(item.name)) {
-				map.set(item.name, map.get(item.name) + item.quantity);
-			} else {
-				map.set(item.name, item.quantity);
+			const map = new Map<string, number>();
+			for (const item of order.items) {
+				if (map.has(item.name)) {
+					map.set(item.name, map.get(item.name) + item.quantity);
+				} else {
+					map.set(item.name, item.quantity);
+				}
 			}
-		}
 
-		for (const item of map.entries()) {
-			const orderItem = new KitchenOrderItem();
-			orderItem.name = item[0];
-			orderItem.quantity = item[1];
-			kitchenOrder.items.push(orderItem);
-		}
+			for (const item of map.entries()) {
+				const orderItem = new KitchenOrderItem();
+				orderItem.name = item[0];
+				orderItem.quantity = item[1];
+				kitchenOrder.items.push(orderItem);
+			}
 
-		this.kitchenOrderRepo.save(kitchenOrder);
+			this.kitchenOrderRepo.save(kitchenOrder);
+		});
 	}
 }
